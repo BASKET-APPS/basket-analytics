@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import localFont from 'next/font/local';
+import { LOGO_PATH } from '@/lib/asset';
 import './globals.css';
 const dm = localFont({
   src: [
@@ -23,7 +24,11 @@ const barlow = localFont({
 export const metadata: Metadata = {
   title: 'CDIR · Basket Analytics',
   description: 'El juego se vive. Los datos lo mejoran. Centro de análisis de CDI Rozasbasket.',
-  icons: { icon: '/club/logo.png' },
+  icons: {
+    icon: LOGO_PATH,
+    shortcut: LOGO_PATH,
+    apple: LOGO_PATH,
+  },
 };
 export const viewport: Viewport = { themeColor: '#101D2F', width: 'device-width', initialScale: 1 };
 export default function Layout({ children }: { children: React.ReactNode }) {

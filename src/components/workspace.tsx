@@ -49,6 +49,7 @@ import {
   type AppUser,
 } from '@/lib/firestore-service';
 import { processPlayerPhoto } from '@/lib/image-upload';
+import { LOGO_PATH } from '@/lib/asset';
 import UserManagement from './user-management';
 import {
   type AppState,
@@ -582,7 +583,7 @@ export default function Workspace() {
   if (!firebaseUser)
     return (
       <main className="access">
-        <img src="/club/logo.png" alt="CDI Rozasbasket" />
+        <img src={LOGO_PATH} alt="CDI Rozasbasket" />
         <p className="eyebrow">CDIR · BASKET ANALYTICS</p>
         <h1>
           El siguiente nivel
@@ -605,7 +606,7 @@ export default function Workspace() {
   if (isAuthorized === false)
     return (
       <main className="access">
-        <img src="/club/logo.png" alt="CDI Rozasbasket" />
+        <img src={LOGO_PATH} alt="CDI Rozasbasket" />
         <p className="eyebrow">ACCESO RESTRINGIDO</p>
         <h1>Cuenta no autorizada</h1>
         <p>
@@ -623,7 +624,7 @@ export default function Workspace() {
   if (!state || !identity)
     return (
       <main className="access">
-        <img src="/club/logo.png" alt="CDI Rozasbasket" />
+        <img src={LOGO_PATH} alt="CDI Rozasbasket" />
         <p className="eyebrow">CDIR · BASKET ANALYTICS</p>
         <h1>Cargando equipo…</h1>
         <p>{error || 'Conectando con Firestore…'}</p>
@@ -833,7 +834,7 @@ export default function Workspace() {
     <div className={`app-shell ${view === 'live' && matchOpen ? 'live-mode' : ''}`}>
       <aside className="sidebar">
         <a className="brand" href="/" aria-label="CDIR Basket Analytics">
-          <img src="/club/logo.png" alt="" />
+          <img src={LOGO_PATH} alt="" />
           <span>
             CDIR<span className="brand-caption">BASKET ANALYTICS</span>
           </span>
@@ -1141,7 +1142,7 @@ export default function Workspace() {
                       </div>
                       <div className="match-teams">
                         <div>
-                          <img src="/club/logo.png" alt="" />
+                          <img src={LOGO_PATH} alt="" />
                           <strong>CDIR</strong>
                         </div>
                         <span>VS</span>
@@ -1754,7 +1755,7 @@ export default function Workspace() {
                     }}
                   >
                     <div className="settings-brand">
-                      <img src="/club/logo.png" alt="Escudo de CDI Rozasbasket" />
+                      <img src={LOGO_PATH} alt="Escudo de CDI Rozasbasket" />
                       <span>
                         CDIR<span>Basket Analytics</span>
                       </span>

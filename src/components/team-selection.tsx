@@ -1,4 +1,5 @@
 'use client';
+import { LOGO_PATH } from '@/lib/asset';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { ArrowRight, Plus, Users, X, Trash2, RotateCcw, Check } from 'lucide-react';
 import type { CatalogEntry } from '@/server/catalog';
@@ -55,7 +56,7 @@ export default function TeamSelection({
   return (
     <main className="team-selection" id="contenido">
       <header className="team-selection-brand">
-        <img src="/club/logo.png" alt="CDI Rozasbasket" />
+        <img src={LOGO_PATH} alt="CDI Rozasbasket" />
         <span>
           CDIR <small>BASKET ANALYTICS</small>
         </span>

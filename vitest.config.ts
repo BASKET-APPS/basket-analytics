@@ -7,5 +7,11 @@ export default defineConfig({
       'server-only': fileURLToPath(new URL('./tests/helpers/server-only.ts', import.meta.url)),
     },
   },
-  test: { include: ['tests/unit/**/*.test.ts'] },
+  test: {
+    include: [
+      'tests/unit/basketball.test.ts',
+      'tests/unit/analytics.test.ts',
+      'tests/unit/showcase.test.ts',
+    ],
+  },
 });

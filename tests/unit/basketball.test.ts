@@ -243,3 +243,47 @@ it('acepta referencias de fotos del propio equipo y rechaza referencias ajenas',
     command(s, 'player', { ...player, photo: photo.replace(s.teamId, '650000000000000000000099') }),
   ).toThrow();
 });
+
+it('permite editar un partido programado futuro y rechaza si la fecha ya pasó', () => {
+  const s = fixture();
+  const futureDate = new Date(Date.now() + 86400000).toISOString();
+  command(s, 'game', {
+    opponent: 'Rival Inicial',
+    date: futureDate,
+    timezone: 'Europe/Madrid',
+    venue: 'HOME',
+    competition: 'Liga',
+    rules: { periods: 4, periodSeconds: 600, overtimeSeconds: 300 },
+  });
+  const created = s.games.find((g) => g.opponent === 'Rival Inicial')!;
+  expect(created).toBeDefined();
+
+  // Edición válida
+  command(s, 'game', {
+    id: created.id,
+    opponent: 'Rival Corregido',
+    date: futureDate,
+    timezone: 'Europe/Madrid',
+    venue: 'AWAY',
+    competition: 'Copa',
+    rules: { periods: 4, periodSeconds: 600, overtimeSeconds: 300 },
+  });
+  expect(created.opponent).toBe('Rival Corregido');
+  expect(created.venue).toBe('AWAY');
+  expect(created.competition).toBe('Copa');
+
+  // Rechazo si la fecha ya pasó
+  created.date = new Date(Date.now() - 3600000).toISOString();
+  expect(() =>
+    command(s, 'game', {
+      id: created.id,
+      opponent: 'Intento Tardío',
+      date: futureDate,
+      timezone: 'Europe/Madrid',
+      venue: 'HOME',
+      competition: 'Liga',
+      rules: { periods: 4, periodSeconds: 600, overtimeSeconds: 300 },
+    }),
+  ).toThrow('No se puede editar un partido cuya fecha ya ha pasado');
+});
+

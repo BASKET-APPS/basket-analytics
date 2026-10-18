@@ -93,7 +93,7 @@ const title: Record<View, string> = {
 };
 type Modal =
   | { type: 'player'; player?: Player }
-  | { type: 'game' }
+  | { type: 'game'; game?: Game }
   | { type: 'roster'; game: Game }
   | { type: 'lineup'; game: Game }
   | { type: 'undo'; game: Game; eventId?: string }
@@ -103,6 +103,12 @@ type Modal =
   | { type: 'help' }
   | { type: 'catalog'; kind: 'team' | 'season' | 'club' }
   | null;
+const toDatetimeLocal = (iso?: string) => {
+  if (!iso) return undefined;
+  const d = new Date(iso);
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+};
 const date = (value: string) =>
   new Intl.DateTimeFormat('es-ES', {
     day: 'numeric',
@@ -802,6 +808,7 @@ export default function Workspace() {
     }
     if (modal?.type === 'game') {
       ok = await send('game', {
+        ...(modal.game ? { id: modal.game.id } : {}),
         opponent: f.get('opponent'),
         date: new Date(String(f.get('date'))).toISOString(),
         timezone: 'Europe/Madrid',
@@ -1487,16 +1494,27 @@ export default function Workspace() {
                         <strong className="game-row-score">
                           {g.status === 'SCHEDULED' ? '—' : `${r.ours} – ${r.opponent}`}
                         </strong>
-                        <button
-                          className="secondary"
-                          onClick={() => {
-                            setGameId(g.id);
-                            navigate('live');
-                            setMatchOpen(true);
-                          }}
-                        >
-                          Abrir <ArrowUpRight size={16} />
-                        </button>
+                        <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+                          {writable && g.status === 'SCHEDULED' && new Date(g.date).getTime() > Date.now() && (
+                            <button
+                              className="secondary"
+                              aria-label={`Editar ${g.opponent}`}
+                              onClick={() => setModal({ type: 'game', game: g })}
+                            >
+                              <Settings2 size={15} /> Editar
+                            </button>
+                          )}
+                          <button
+                            className="secondary"
+                            onClick={() => {
+                              setGameId(g.id);
+                              navigate('live');
+                              setMatchOpen(true);
+                            }}
+                          >
+                            Abrir <ArrowUpRight size={16} />
+                          </button>
+                        </div>
                       </article>
                     );
                   })}
@@ -1668,6 +1686,7 @@ export default function Workspace() {
               onPractice={() => {
                 void send('practice', {});
               }}
+              onEdit={(g) => setModal({ type: 'game', game: g })}
             />
           )}
           {view === 'live' && matchOpen && (
@@ -2039,25 +2058,30 @@ export default function Workspace() {
               )}
               {modal.type === 'game' && (
                 <>
-                  <h2>Un nuevo reto.</h2>
-                  {field('Equipo rival', 'opponent')}
+                  <h2>{modal.game ? 'Editar partido programado.' : 'Un nuevo reto.'}</h2>
+                  {modal.game && (
+                    <p>
+                      Modifica los datos del encuentro antes de la fecha programada.
+                    </p>
+                  )}
+                  {field('Equipo rival', 'opponent', modal.game?.opponent)}
                   <div className="form-grid">
                     {field(
                       'Fecha y hora (zona del dispositivo)',
                       'date',
-                      undefined,
+                      toDatetimeLocal(modal.game?.date),
                       'datetime-local',
                     )}
                     <label>
                       Sede
-                      <select name="venue">
+                      <select name="venue" defaultValue={modal.game?.venue || 'HOME'}>
                         <option value="HOME">Casa</option>
                         <option value="AWAY">Fuera</option>
                         <option value="NEUTRAL">Neutral</option>
                       </select>
                     </label>
                   </div>
-                  {field('Competición / jornada', 'competition', 'Liga')}
+                  {field('Competición / jornada', 'competition', modal.game?.competition || 'Liga')}
                   <div className="form-grid three">
                     <label>
                       Periodos
@@ -2066,7 +2090,7 @@ export default function Workspace() {
                         type="number"
                         min="1"
                         max="12"
-                        defaultValue="4"
+                        defaultValue={modal.game?.rules.periods ?? 4}
                         required
                       />
                     </label>
@@ -2077,7 +2101,7 @@ export default function Workspace() {
                         type="number"
                         min="1"
                         max="60"
-                        defaultValue="10"
+                        defaultValue={modal.game ? Math.floor(modal.game.rules.periodSeconds / 60) : 10}
                         required
                       />
                     </label>
@@ -2088,7 +2112,7 @@ export default function Workspace() {
                         type="number"
                         min="1"
                         max="20"
-                        defaultValue="5"
+                        defaultValue={modal.game ? Math.floor(modal.game.rules.overtimeSeconds / 60) : 5}
                         required
                       />
                     </label>

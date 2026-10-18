@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { ArrowRight, CalendarDays, FlaskConical, Users } from 'lucide-react';
+import { ArrowRight, CalendarDays, FlaskConical, Users, Settings2 } from 'lucide-react';
 import type { Game } from '@/domain/basketball/types';
 import { reduceGameEvents } from '@/domain/basketball/stats';
 
@@ -12,6 +12,7 @@ export default function LiveMatchSelection({
   canScore,
   onOpen,
   onPractice,
+  onEdit,
 }: {
   games: Game[];
   sandbox?: boolean;
@@ -20,6 +21,7 @@ export default function LiveMatchSelection({
   canScore: boolean;
   onOpen: (id: string) => void;
   onPractice: () => void;
+  onEdit?: (game: Game) => void;
 }) {
   const [filter, setFilter] = useState('ALL');
   const tabs = [
@@ -123,14 +125,28 @@ export default function LiveMatchSelection({
                 {game.roster.length} convocados
                 {game.competition && <span> · {game.competition}</span>}
               </div>
-              <button className="primary" disabled={busy} onClick={() => onOpen(game.id)}>
-                {game.status === 'SCHEDULED'
-                  ? 'Preparar partido'
-                  : game.status === 'FINAL'
-                    ? 'Ver partido y estadísticas'
-                    : 'Continuar partido'}
-                <ArrowRight size={18} />
-              </button>
+              <div style={{ display: 'flex', gap: '0.5rem', width: '100%' }}>
+                {canScore && game.status === 'SCHEDULED' && new Date(game.date).getTime() > Date.now() && onEdit && (
+                  <button
+                    type="button"
+                    className="secondary"
+                    disabled={busy}
+                    onClick={() => onEdit(game)}
+                    aria-label={`Editar ${game.opponent}`}
+                    style={{ padding: '0.65rem 0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  >
+                    <Settings2 size={16} />
+                  </button>
+                )}
+                <button className="primary" style={{ flex: 1 }} disabled={busy} onClick={() => onOpen(game.id)}>
+                  {game.status === 'SCHEDULED'
+                    ? 'Preparar partido'
+                    : game.status === 'FINAL'
+                      ? 'Ver partido y estadísticas'
+                      : 'Continuar partido'}
+                  <ArrowRight size={18} />
+                </button>
+              </div>
             </article>
           );
         })}

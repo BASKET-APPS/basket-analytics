@@ -25,6 +25,7 @@ const player = z.object({
   photo: z.string().max(400000).optional(),
 });
 const game = z.object({
+  id: entityId.optional(),
   opponent: z.string().trim().min(2).max(100),
   date: z.string().datetime(),
   timezone: z.literal('Europe/Madrid'),
@@ -182,6 +183,25 @@ export function applyCommand(
   }
   if (c.action === 'game') {
     const data = game.parse(c.payload);
+    if (data.id) {
+      const current = s.games.find((x) => x.id === data.id);
+      if (!current) throw new AppError(404, 'Partido no encontrado');
+      if (current.status !== 'SCHEDULED') {
+        throw new AppError(422, 'Solo se pueden editar partidos no iniciados');
+      }
+      if (new Date(current.date).getTime() <= Date.now()) {
+        throw new AppError(422, 'No se puede editar un partido cuya fecha ya ha pasado');
+      }
+      current.opponent = data.opponent;
+      current.date = data.date;
+      current.venue = data.venue;
+      current.competition = data.competition;
+      current.rules = data.rules;
+      current.remaining = data.rules.periodSeconds;
+      current.version++;
+      audit(`Editar partido: ${data.opponent}`);
+      return;
+    }
     s.games.push({
       ...data,
       id: newId(),

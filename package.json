@@ -1,0 +1,49 @@
+{
+  "name": "cdir-basket-analytics",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "^24.0.0 || >=26.0.0"
+  },
+  "scripts": {
+    "dev": "next dev --hostname 127.0.0.1 --port 3001",
+    "build": "next build",
+    "postbuild": "node scripts/fix-static-segments.cjs",
+    "start": "next start --hostname 127.0.0.1 --port 3001",
+    "check": "tsc --noEmit",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "db:seed": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --conditions=react-server --import tsx scripts/seed-mongodb.ts",
+    "dev:demo": "node scripts/dev-demo.mjs",
+    "format": "prettier --write src tests scripts *.ts *.json",
+    "db:init": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --conditions=react-server --import tsx scripts/init-mongodb.ts",
+    "dev:atlas": "node scripts/dev-atlas.mjs"
+  },
+  "dependencies": {
+    "@tailwindcss/postcss": "4.3.3",
+    "better-auth": "1.7.10",
+    "firebase": "^13.0.0",
+    "lucide-react": "1.59.0",
+    "mongodb": "7.7.0",
+    "next": "16.4.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "server-only": "0.0.1",
+    "sharp": "^0.35.5",
+    "tailwindcss": "4.3.3",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "mongodb-memory-server": "11.3.0",
+    "prettier": "3.8.4",
+    "tsx": "4.23.15",
+    "typescript": "7.0.2",
+    "vite": "8.3.4",
+    "vitest": "5.0.5"
+  }
+}

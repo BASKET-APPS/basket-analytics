@@ -1,0 +1,159 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+}
+model User {
+  id String @id
+  name String
+  email String @unique
+  emailVerified Boolean @default(false)
+  image String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  sessions Session[]
+  accounts Account[]
+  memberships Membership[]
+  @@map("users")
+}
+model Session {
+  id String @id
+  expiresAt DateTime
+  token String @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId String
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+}
+model Account {
+  id String @id
+  accountId String
+  providerId String
+  userId String
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  accessToken String?
+  refreshToken String?
+  idToken String?
+  accessTokenExpiresAt DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope String?
+  password String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+model Verification {
+  id String @id
+  identifier String
+  value String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+model Club {
+  id String @id @default(uuid())
+  name String
+  logoUrl String?
+  teams Team[]
+  seasons Season[]
+}
+model Team {
+  id String @id @default(uuid())
+  clubId String
+  club Club @relation(fields:[clubId],references:[id])
+  name String
+  category String
+  seasons TeamSeason[]
+  memberships Membership[]
+}
+model Season {
+  id String @id @default(uuid())
+  clubId String
+  club Club @relation(fields:[clubId],references:[id])
+  name String
+  startsAt DateTime
+  endsAt DateTime
+  teams TeamSeason[]
+}
+model TeamSeason {
+  id String @id @default(uuid())
+  teamId String
+  team Team @relation(fields:[teamId],references:[id])
+  seasonId String
+  season Season @relation(fields:[seasonId],references:[id])
+  version Int @default(0)
+  roster RosterEntry[]
+  games Game[]
+  audit AuditLog[]
+  @@unique([teamId,seasonId])
+}
+model Membership {
+  id String @id @default(uuid())
+  userId String
+  user User @relation(fields:[userId],references:[id])
+  teamId String
+  team Team @relation(fields:[teamId],references:[id])
+  role String
+  @@unique([userId,teamId])
+}
+model Player {
+  id String @id @default(uuid())
+  name String
+  photo String?
+  position String
+  entries RosterEntry[]
+}
+model RosterEntry {
+  id String @id @default(uuid())
+  playerId String
+  player Player @relation(fields:[playerId],references:[id])
+  teamSeasonId String
+  teamSeason TeamSeason @relation(fields:[teamSeasonId],references:[id])
+  number Int
+  active Boolean @default(true)
+  @@unique([teamSeasonId,playerId])
+  @@index([teamSeasonId,number])
+}
+model Game {
+  id String @id @default(uuid())
+  teamSeasonId String
+  teamSeason TeamSeason @relation(fields:[teamSeasonId],references:[id])
+  opponent String
+  date DateTime
+  timezone String
+  venue String
+  competition String
+  status String
+  roster Json
+  rules Json
+  period Int
+  remaining Int
+  elapsed Int
+  version Int @default(0)
+  events GameEvent[]
+  @@index([teamSeasonId,date])
+  @@index([teamSeasonId,venue,status])
+}
+model GameEvent {
+  id String @id
+  gameId String
+  game Game @relation(fields:[gameId],references:[id])
+  mutationId String
+  sequence Int
+  payload Json
+  @@unique([gameId,mutationId])
+  @@unique([gameId,sequence])
+}
+model AuditLog {
+  id String @id @default(uuid())
+  teamSeasonId String
+  teamSeason TeamSeason @relation(fields:[teamSeasonId],references:[id])
+  at DateTime @default(now())
+  actor String
+  action String
+  detail String
+  @@index([teamSeasonId,at])
+}

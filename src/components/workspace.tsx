@@ -1827,6 +1827,9 @@ export default function Workspace() {
               </Panel>
             </>
           )}
+          {view === 'users' && (
+            <UserManagement currentUserEmail={firebaseUser?.email || ''} />
+          )}
           <footer className="app-footer">
             <span>
               CDIR <b>/</b> BASKET ANALYTICS
